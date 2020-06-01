@@ -16,3 +16,4 @@ artifacts:
     - start-service.sh
     - stop-service.sh
     - target/aws-boostrap-spring-boot-docker-*.jar
+    - appspec.yml

@@ -109,6 +109,7 @@ Resources:
 
           cat > /tmp/install_script.sh << EOF
             # START
+            yes | amazon-linux-extras install java-openjdk11
             yes | amazon-linux-extras install docker
             service docker start
             usermod -a -G docker ec2-user
