@@ -1,6 +1,6 @@
 #!/bin/bash
 
-STACK_NAME=awsbootstrap-spring-boot-docker
+STACK_NAME=spring-boot-docker
 REGION=us-east-1
 CLI_PROFILE=default
 
