@@ -11,6 +11,11 @@ AWS_ACCOUNT_ID=`aws sts get-caller-identity \
         --query "Account" --output text`
 CODEPIPELINE_BUCKET="$STACK_NAME-$REGION-codepipeline-$AWS_ACCOUNT_ID"
 
+DB_INSTANCE_ID=springbootdocker
+DB_NAME=springbootdocker
+DB_USER=user
+DB_PASSWORD=password
+
 GH_ACCESS_TOKEN=$(cat ~/.github/aws-bootstrap-spring-boot-docker/access-token)
 GH_OWNER=$(cat ~/.github/jessefriedland-owner)
 GH_REPO=$(cat ~/.github/aws-bootstrap-spring-boot-docker/repo)
@@ -26,7 +31,7 @@ aws cloudformation deploy \
   --no-fail-on-empty-changeset \
   --capabilities CAPABILITY_NAMED_IAM \
   --parameter-overrides \
-    CodePipelineBucket=$CODEPIPELINE_BUCKET
+    CodePipelineBucket=$CODEPIPELINE_BUCKET \
 
 # Deploy the CloudFormation template
 echo -e "\n\n=========== Deploying main.yml ==========="
@@ -43,11 +48,18 @@ aws cloudformation deploy \
     GitHubRepo=$GH_REPO \
     GitHubBranch=$GH_BRANCH \
     GitHubPersonalAccessToken=$GH_ACCESS_TOKEN \
-    CodePipelineBucket=$CODEPIPELINE_BUCKET
+    CodePipelineBucket=$CODEPIPELINE_BUCKET \
+    DBInstanceID=$DB_INSTANCE_ID \
+    DBName=$DB_NAME \
+    DBUser=$DB_USER \
+    DBPassword=$DB_PASSWORD \
 
 # If the deploy succeeded, show the DNS name of the created instance
 if [ $? -eq 0 ]; then
   aws cloudformation list-exports \
     --profile $CLI_PROFILE \
-    --query "Exports[?Name=='InstanceEndpoint'].Value"
+    --query "Exports[?ends_with(Name,'LBEndpoint')].Value"
+  aws cloudformation list-exports \
+    --profile $CLI_PROFILE \
+    --query "Exports[?Name=='JDBCConnectionString'].Value"
 fi
