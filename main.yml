@@ -260,6 +260,18 @@ Resources:
         - !Ref SubnetAZ1
         - !Ref SubnetAZ2
 
+  DBDeveloperSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: 'Open database for access for developers'
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - GroupName: 'jesses ct house'
+          IpProtocol: tcp
+          FromPort: '3306'
+          ToPort: '3306'
+          CidrIp: 68.14.151.0/24
+
   DBEC2SecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -283,11 +295,13 @@ Resources:
       MultiAZ: false
       EngineVersion: 5.7.22
       MasterUsername: !Ref 'DBUser'
+      PubliclyAccessible: true
       MasterUserPassword: !Ref 'DBPassword'
       DBParameterGroupName: !Ref 'MyRDSParamGroup'
       DBSubnetGroupName: !Ref 'DBSubnetGroup'
       VPCSecurityGroups:
         - !Ref 'DBEC2SecurityGroup'
+        - !Ref 'DBDeveloperSecurityGroup'
 
   MyRDSParamGroup:
     Type: AWS::RDS::DBParameterGroup
@@ -495,7 +509,6 @@ Resources:
       TargetPipelineVersion: !GetAtt Pipeline.Version
       RegisterWithThirdParty: true
 
-
 Outputs:
   LBEndpoint:
     Description: The DNS name for the LB
@@ -504,5 +517,4 @@ Outputs:
       Name: LBEndpoint
   JDBCConnectionString:
     Description: 'JDBC connection string for the database'
-    Value: !Join ['', [     'jdbc:mysql://', !GetAtt [AppDB, Endpoint.Address], ':', !GetAtt [
-      AppDB, Endpoint.Port], /, !Ref 'DBName']]
+    Value: !Join ['', ['jdbc:mysql://', !GetAtt AppDB.Endpoint.Address, ':', !GetAtt AppDB.Endpoint.Port, '/', !Ref 'DBName']]
